@@ -1,0 +1,56 @@
+version: '2.3'
+
+x-lagoon-project:
+  &lagoon-project demo-backstage
+
+x-environment:
+  &default-environment
+    LAGOON_PROJECT: *lagoon-project
+    LAGOON_ROUTE: http://demo-backstage.docker.amazee.io
+
+services:
+        
+  # SERVICE: N8N container
+  backstage:
+    env_file:
+      - .lagoon.env
+      - .env.local
+    networks:
+      - amazeeio-network
+      - default
+    build:
+      context: .
+      dockerfile: lagoon/backstage.dockerfile
+    image: &n8n-image demo-backstage-backstage # this image will be reused as `N8N_IMAGE` in subsequent Docker builds
+    environment:
+      << : *default-environment # loads the defined environment variables from the top
+    labels:
+      # Lagoon Labels
+      lagoon.type: node-persistent
+      lagoon.persistent: /app/storage/ # location where the persistent storage should be mounted
+      # lagoon.persistent.name: nginx # mount the persistent storage of nginx into this container
+      # lagoon.deployment.servicetype: node
+    volumes:
+      - ./app/storage:/app/storage:delegated
+    depends_on:
+      - mariadb
+      - redis
+    restart: always
+    ports:
+      - "3001:3000"
+
+  # SERVICE: MariaDB
+  postgres:
+    env_file:
+      - .lagoon.env
+      - .env.local
+    networks:
+      - amazeeio-network
+      - default
+    image: amazeeio/postgres
+    labels:
+      lagoon.type: postgres
+
+networks:
+  amazeeio-network:
+    external: true
