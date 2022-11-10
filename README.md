@@ -11,7 +11,9 @@ yarn dev
 
 ---
 
-To run in Docker
+To run in Docker locally (for Lagoon style work)
+
+- touch .env.local (and pop and variables you'd like in there for local development)
 
 ```sh
 export DOCKER_BUILDKIT=1 # or configure in daemon.json
