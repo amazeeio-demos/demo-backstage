@@ -1,6 +1,6 @@
 app:
   # Should be the same as backend.baseUrl when using the `app-backend` plugin.
-  baseUrl: http://localhost:7007
+  baseUrl: ${LAGOON_ROUTE}
 
 backend:
   # Note that the baseUrl should be the URL that the browser and other clients
@@ -8,9 +8,9 @@ backend:
   # reachable not just from within the backend host, but from all of your
   # callers. When its value is "http://localhost:7007", it's strictly private
   # and can't be reached by others.
-  baseUrl: http://localhost:7007
+  baseUrl: ${LAGOON_ROUTE}
   listen:
-    port: 7007
+    port: 3000
     # The following host directive binds to all IPv4 interfaces when its value
     # is "0.0.0.0". This is the most permissive setting. The right value depends
     # on your specific deployment. If you remove the host line entirely, the
@@ -22,10 +22,10 @@ backend:
   database:
     client: pg
     connection:
-      host: ${POSTGRES_HOST}
-      port: ${POSTGRES_PORT}
-      user: ${POSTGRES_USER}
-      password: ${POSTGRES_PASSWORD}
+      host: ${POSTGRES_HOST:5432}
+      port: ${POSTGRES_PORT:5432}
+      user: ${POSTGRES_USER:lagoon}
+      password: ${POSTGRES_PASSWORD:lagoon}
       # https://node-postgres.com/features/ssl
       # you can set the sslmode configuration option via the `PGSSLMODE` environment variable
       # see https://www.postgresql.org/docs/current/libpq-ssl.html Table 33.1. SSL Mode Descriptions (e.g. require)

@@ -1,6 +1,9 @@
 # macOS
 .DS_Store
 
+# Lagoon
+.env.local
+
 # Logs
 logs
 *.log

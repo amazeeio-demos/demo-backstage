@@ -12,8 +12,10 @@ COPY packages packages
 # Comment this out if you don't have any internal plugins
 COPY plugins plugins
 
-RUN find packages \! -name "package.json" -mindepth 2 -maxdepth 2 -exec rm -rf {} \+
+# Comment this out if you don't want the examples
+COPY examples examples
 
+RUN find packages \! -name "package.json" -mindepth 2 -maxdepth 2 -exec rm -rf {} \+
 
 
 ###############################################
@@ -41,12 +43,10 @@ RUN mkdir packages/backend/dist/skeleton packages/backend/dist/bundle \
     && tar xzf packages/backend/dist/bundle.tar.gz -C packages/backend/dist/bundle
 
 
-
 ###############################################
 # Stage 3 - Build the actual backend image and install production dependencies
 ###############################################
-# FROM node:16-bullseye-slim
-FROM uselagoon/node-16
+FROM node:16-bullseye-slim AS image
 
 # From here on we use the least-privileged `node` user to run the backend.
 USER node
@@ -66,12 +66,24 @@ RUN --mount=type=cache,target=/home/node/.cache/yarn,sharing=locked,uid=1000,gid
 COPY --from=build --chown=node:node /app/packages/backend/dist/bundle/ ./
 
 # Copy any other files that we need at runtime
-COPY --chown=node:node app-config.yaml ./
+COPY --chown=node:node app-config*.yaml ./
+
+# Comment this out if you don't want the examples
+COPY --from=build /app/examples /app/examples
+
+################################
+# Switch to a Lagoon base image
+################################
+FROM uselagoon/node-16
+COPY --from=image /app /app
+RUN fix-permissions /app
+
+# Lagoon specifi entrypoint - remove if we don't need it
+COPY lagoon/backstage-entrypoint.sh /lagoon/entrypoints/backstage-n8n-entrypoint
+COPY lagoon/start.sh /app/lagoon/start.sh
 
 # This switches many Node.js dependencies to production mode.
 ENV NODE_ENV production
 
-# Lagoon specifi entrypoint - remove if we don't need it
-COPY lagoon/backstage-entrypoint.sh /lagoon/entrypoints/backstage-n8n-entrypoint
-
-CMD ["node", "packages/backend", "--config", "app-config.yaml"]
+# CMD ["node", "packages/backend", "--config", "app-config.yaml"]
+CMD ["/app/lagoon/start.sh"]
