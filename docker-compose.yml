@@ -12,8 +12,8 @@ services:
         
   # SERVICE: N8N container
   backstage:
-    env_file:
-      - .env.local
+    #env_file:
+      #- .env.local
     networks:
       - amazeeio-network
       - default
@@ -39,8 +39,8 @@ services:
 
   # SERVICE: MariaDB
   postgres:
-    env_file:
-      - .env.local
+    #env_file:
+      #- .env.local
     networks:
       - amazeeio-network
       - default
